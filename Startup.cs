@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Orleans.Runtime.Configuration;
+using Orleans.Runtime.Host;
 
 namespace Market
 {
@@ -28,6 +31,8 @@ namespace Market
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
+            services.AddSingleton<OrleansHostWrapper>();
+            AddOrleansConfiguration(services);
             services.AddMvc();
         }
 
@@ -37,7 +42,16 @@ namespace Market
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
+            app.ApplicationServices.GetRequiredService<OrleansHostWrapper>().Start();
             app.UseMvc();
+        }
+
+        private void AddOrleansConfiguration(IServiceCollection services)
+        {
+            var config = ClusterConfiguration.LocalhostPrimarySilo();
+            config.AddMemoryStorageProvider();
+            config.Defaults.TraceFilePattern = null;
+            services.AddSingleton(config);
         }
     }
 }
