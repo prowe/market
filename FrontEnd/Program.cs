@@ -6,8 +6,6 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Orleans.Runtime.Configuration;
-using Orleans.Runtime.Host;
 
 namespace Market
 {

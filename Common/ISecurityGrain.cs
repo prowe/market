@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
 using Orleans;
 
-namespace Market.Securities
+namespace Market
 {
-    public interface ISecurityActor : IGrainWithStringKey
+    public interface ISecurityGrain : IGrainWithStringKey
     {
         Task<Quote> GetQuoteAsync();
     }

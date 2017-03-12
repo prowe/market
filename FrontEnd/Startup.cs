@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Orleans;
 using Orleans.Runtime.Configuration;
-using Orleans.Runtime.Host;
 
 namespace Market
 {
@@ -30,9 +26,9 @@ namespace Market
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton(CreateGrainFactory);
+
             // Add framework services.
-            services.AddSingleton<OrleansHostWrapper>();
-            AddOrleansConfiguration(services);
             services.AddMvc();
         }
 
@@ -42,16 +38,16 @@ namespace Market
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            app.ApplicationServices.GetRequiredService<OrleansHostWrapper>().Start();
             app.UseMvc();
         }
 
-        private void AddOrleansConfiguration(IServiceCollection services)
+        private IGrainFactory CreateGrainFactory(IServiceProvider services)
         {
-            var config = ClusterConfiguration.LocalhostPrimarySilo();
-            config.AddMemoryStorageProvider();
-            config.Defaults.TraceFilePattern = null;
-            services.AddSingleton(config);
+            var config = ClientConfiguration.LocalhostSilo();
+            config.TraceFileName = null;
+            
+            GrainClient.Initialize(config);
+            return GrainClient.GrainFactory;
         }
     }
 }

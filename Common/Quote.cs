@@ -1,4 +1,4 @@
-namespace Market.Securities
+namespace Market
 {
     public class Quote
     {
