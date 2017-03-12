@@ -6,14 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Orleans;
 
-namespace Market.Securities
+namespace Market
 {
-    public class SecuritiesController : Controller
+    public class SecurityController : Controller
     {
         private readonly IGrainFactory grainFactory;
-        private readonly ILogger<SecuritiesController> logger;
+        private readonly ILogger<SecurityController> logger;
 
-        public SecuritiesController(IGrainFactory grainFactory, ILogger<SecuritiesController> logger)
+        public SecurityController(IGrainFactory grainFactory, ILogger<SecurityController> logger)
         {
             this.grainFactory = grainFactory;
             this.logger = logger;

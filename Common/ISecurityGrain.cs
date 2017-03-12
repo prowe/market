@@ -6,5 +6,7 @@ namespace Market
     public interface ISecurityGrain : IGrainWithStringKey
     {
         Task<Quote> GetQuoteAsync();
+
+        Task SubmitOrderAsync(Order order);
     }
 }

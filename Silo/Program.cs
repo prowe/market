@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Threading;
 using Orleans.Runtime.Configuration;
 using Orleans.Runtime.Host;
 
@@ -10,7 +11,7 @@ namespace Market
         public static void Main(string[] args)
         {
             var config = ClusterConfiguration.LocalhostPrimarySilo();
-            config.AddMemoryStorageProvider();
+            config.AddMemoryStorageProvider(providerName: "Default");
             config.Defaults.TraceFilePattern = null;
 
             var siloHost = new SiloHost(Dns.GetHostName(), config);
@@ -19,11 +20,7 @@ namespace Market
             siloHost.InitializeOrleansSilo();
             siloHost.StartOrleansSilo(false);
 
-            Console.WriteLine("Press Enter to terminate...");
-            Console.ReadLine();
-
-            siloHost.StopOrleansSilo();
-            siloHost.Dispose();
+            Thread.Sleep(TimeSpan.MaxValue);
         }
     }
 }
