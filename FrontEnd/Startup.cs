@@ -38,6 +38,8 @@ namespace Market
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
+            app.UseStaticFiles();
+            app.UseDefaultFiles();
             app.UseMvc();
         }
 
