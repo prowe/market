@@ -24,7 +24,7 @@ namespace Market
         public async Task<Quote> GetQuote(string symbol)
         {
             var securityGrain = grainFactory.GetGrain<ISecurityGrain>(symbol);
-            return await securityGrain.GetQuoteAsync();
+            return await securityGrain.GetQuote();
         }
     }
 }

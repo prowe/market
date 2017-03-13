@@ -8,7 +8,7 @@ namespace Market
 {
     public class SecurityGrain : Grain<SecurityGrainState>, ISecurityGrain
     {
-        public Task<Quote> GetQuoteAsync()
+        public Task<Quote> GetQuote()
         {
             var quote = new Quote
             {
@@ -19,7 +19,7 @@ namespace Market
             return Task.FromResult(quote);
         }
 
-        public Task SubmitOrderAsync(Order order)
+        public Task SubmitOrder(Order order)
         {
             if (order.Type == OrderType.Buy)
             {

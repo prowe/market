@@ -12,7 +12,7 @@ namespace Market
         {
             var config = ClusterConfiguration.LocalhostPrimarySilo();
             config.AddMemoryStorageProvider(providerName: "Default");
-            config.Defaults.TraceFilePattern = null;
+            config.Defaults.TraceFileName = null;
 
             var siloHost = new SiloHost(Dns.GetHostName(), config);
             siloHost.LoadOrleansConfig();
@@ -20,7 +20,7 @@ namespace Market
             siloHost.InitializeOrleansSilo();
             siloHost.StartOrleansSilo(false);
 
-            Thread.Sleep(TimeSpan.MaxValue);
+            Thread.Sleep(Timeout.Infinite);
         }
     }
 }

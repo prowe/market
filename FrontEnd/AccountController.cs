@@ -24,10 +24,19 @@ namespace Market
         public async Task<Order> SubmitOrder([FromBody] Order order)
         {
             logger.LogInformation("Submitting order: {0}", order);
-            var securityGrain = grainFactory.GetGrain<ISecurityGrain>(order.Symbol);
-            await securityGrain.SubmitOrderAsync(order);
+            await AccountGrain.SubmitOrder(order);
             logger.LogInformation("Order submitted: {0}", order);
             return order;
         }
+
+        [Route("api/orders")]
+        [HttpGet]
+        public async Task<IEnumerable<Order>> GetOrders()
+        {
+            return await AccountGrain.GetOpenOrders();
+        }
+
+        private IAccountGrain AccountGrain 
+            => grainFactory.GetGrain<IAccountGrain>("abc@example.com");
     }
 }
