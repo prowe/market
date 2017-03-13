@@ -23,6 +23,7 @@ namespace Market
         [Route("api/orders")]
         public async Task<Order> SubmitOrder([FromBody] Order order)
         {
+            order.AccountId = "abc@example.com";
             logger.LogInformation("Submitting order: {0}", order);
             await AccountGrain.SubmitOrder(order);
             logger.LogInformation("Order submitted: {0}", order);
@@ -34,6 +35,13 @@ namespace Market
         public async Task<IEnumerable<Order>> GetOrders()
         {
             return await AccountGrain.GetOpenOrders();
+        }
+
+        [Route("api/positions")]
+        [HttpGet]
+        public async Task<IEnumerable<Position>> GetPostitions()
+        {
+            return await AccountGrain.GetPositions();
         }
 
         private IAccountGrain AccountGrain 

@@ -6,6 +6,8 @@ namespace Market
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
+        public string AccountId { get; set; }
+
         public string Symbol { get; set; }
 
         public decimal Price { get; set; }
@@ -13,12 +15,12 @@ namespace Market
         public OrderType Type { get; set; }
 
         public override string ToString()
-            => $"Order #{Id} {Type} {Symbol} @ {Price}";
+            => $"Order #{Id} {AccountId} {Type} {Symbol}@{Price}";
 
         public override bool Equals(object obj)
             => Id.Equals((obj as Order)?.Id);
 
-        public override int GetHashCode() 
+        public override int GetHashCode()
             => Id.GetHashCode();
     }
 

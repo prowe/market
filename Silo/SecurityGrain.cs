@@ -21,15 +21,50 @@ namespace Market
 
         public Task SubmitOrder(Order order)
         {
-            if (order.Type == OrderType.Buy)
+            PushOrderToLevel2(order);
+            return CheckForFill();
+        }
+
+        private void PushOrderToLevel2(Order order)
+        {
+            var stack = order.Type == OrderType.Buy
+                ? this.State.Bids
+                : this.State.Offers;
+            stack.Add(order);
+        }
+
+        private Task CheckForFill()
+        {
+            var bids = this.State.Bids;
+            if (!bids.Any())
             {
-                this.State.Bids.Add(order);
+                return Task.CompletedTask;
             }
-            if (order.Type == OrderType.Sell)
+            var offers = this.State.Offers;
+            if (!offers.Any())
             {
-                this.State.Offers.Add(order);
+                return Task.CompletedTask;
             }
+
+            var headBid = bids.FirstOrDefault();
+            var headOffer = offers.FirstOrDefault();
+            if(headBid.Price >= headOffer.Price)
+            {
+                GetLogger().TrackTrace("Filling orders: " + headBid + headOffer);
+                return Task.WhenAll(
+                    ExecuteFill(headBid, bids),
+                    ExecuteFill(headOffer, offers)
+                );
+            }
+
             return Task.CompletedTask;
+        }
+
+        private Task ExecuteFill(Order filledOrder, ISet<Order> orderQueue)
+        {
+            orderQueue.Remove(filledOrder);
+            var account = GrainFactory.GetGrain<IAccountGrain>(filledOrder.AccountId);
+            return account.OrderFilled(filledOrder);
         }
     }
 
