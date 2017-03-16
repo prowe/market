@@ -19,10 +19,11 @@ namespace Market
             return Task.FromResult(quote);
         }
 
-        public Task SubmitOrder(Order order)
+        public async Task SubmitOrder(Order order)
         {
             PushOrderToLevel2(order);
-            return CheckForFill();
+            await CheckForFill();
+            await this.WriteStateAsync();
         }
 
         private void PushOrderToLevel2(Order order)
