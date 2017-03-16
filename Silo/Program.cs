@@ -52,7 +52,7 @@ namespace Market
             config.Globals.DeploymentId = "dev";
             config.Globals.DataConnectionString = StorageConnectionString;
             config.Defaults.Port = 40000;
-            config.Defaults.ProxyGatewayEndpoint = new IPEndPoint(IPAddress.Loopback, 40001);
+            config.Defaults.ProxyGatewayEndpoint = new IPEndPoint(IPAddress.Any, 40001);
             config.Defaults.TraceFileName = null;
             config.Defaults.TraceFilePattern = null;
             config.AddAzureTableStorageProvider(

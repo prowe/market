@@ -50,14 +50,14 @@ namespace Market
         {
             string StorageConnectionString  = "DefaultEndpointsProtocol=https;AccountName=prowemarket;AccountKey=4JOmgr/4XmolsEXzQJCrTlgpTqT/GCmwFB78y04sFOw57on+k3V6P36qECUVD86aV6FVBYmrRLvesmydP6jDaw==;";
             var config = new ClientConfiguration();
-            config.Gateways = new List<IPEndPoint> {
+            /*config.Gateways = new List<IPEndPoint> {
                 new IPEndPoint(IPAddress.Loopback, 40001)
             } as IList<IPEndPoint>;
-            //config.GatewayProvider = ClientConfiguration.GatewayProviderType.AzureTable;
+            */
+            config.GatewayProvider = ClientConfiguration.GatewayProviderType.AzureTable;
             config.DeploymentId = "dev";
-            //config.DataConnectionString = StorageConnectionString;
+            config.DataConnectionString = StorageConnectionString;
             config.TraceFileName = null;
-            
             
             GrainClient.Initialize(config);
             return GrainClient.GrainFactory;
