@@ -24,28 +24,67 @@
                 @error="onSignInError">
                 Sign in with Google
             </g-signin-button>
+
+            <div id="portfolio" v-if="user">
+                <h2>Portfolio</h2>
+                <table>
+                    <tbody>
+                        <tr v-for="p in positions">
+                            <td>{{p.symbol}}</td>
+                            <td>{{p.quantity}}</td>
+                            <td>{{p.totalCostBasis}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </main>
 
         <script src="https://unpkg.com/vue"></script>
+        <script src="https://cdn.jsdelivr.net/vue.resource/1.2.1/vue-resource.min.js"></script>
         <script src="https://apis.google.com/js/api:client.js"></script>
         <script src="https://unpkg.com/vue-google-signin-button"></script>
         <script type="text/javascript">
+            function bearerTokenIntercepter (request, next) {
+                if (this.user) {
+                    var token = this.user.getAuthResponse().id_token;
+                    request.headers.set('Authorization', 'Bearer ' + token);
+                }
+                next();
+            }
+            Vue.http.interceptors.push(this.bearerTokenIntercepter);
+
             var app = new Vue({
                 el: "main",
                 data: {
                     user: null,
                     googleSignInParams: {
-                        client_id: '548329189765-5jvrf6dbe5u2knudlgqi46pabk8rcdf0.apps.googleusercontent.com'
-                    }
+                        client_id: '548329189765-5jvrf6dbe5u2knudlgqi46pabk8rcdf0.apps.googleusercontent.com',
+                        scope: "openid profile email"
+                    },
+                    positions: []
+                },
+                created: function() {
+                    setInterval(this.refreshPositions, 2000);
                 },
                 methods: {
-                    onSignInSuccess (googleUser) {
+                    onSignInSuccess: function (googleUser) {
                         console.log("signed in", googleUser);
                         this.user = googleUser;
+                        window.user = googleUser;
                     },
-                    onSignInError (error) {
+                    onSignInError: function (error) {
                         // `error` contains any error occurred. 
                         console.log('OH NOES', error)
+                    },
+                    
+                    refreshPositions: function () {
+                        if (!this.user) {
+                            return;
+                        }
+                        console.log("Refreshing positions");
+                        this.$http.get('/api/positions').then(function(response) {
+                            this.positions = response.body;
+                        });
                     }
                 }
             });

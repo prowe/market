@@ -9,6 +9,8 @@ using Orleans;
 using Orleans.Runtime.Configuration;
 using Orleans.Runtime.Host;
 using System.Net;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Market
 {
@@ -41,9 +43,27 @@ namespace Market
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            app.UseStaticFiles();
+            app.UseJwtBearerAuthentication(new JwtBearerOptions
+            {
+                MetadataAddress = "https://accounts.google.com/.well-known/openid-configuration",
+                AutomaticAuthenticate = true,
+                AutomaticChallenge = true,
+                TokenValidationParameters = new TokenValidationParameters {
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    NameClaimTypeRetriever = NameClaimTypeRetriever
+                },
+                
+            });
+
             app.UseDefaultFiles();
+            app.UseStaticFiles();
             app.UseMvc();
+        }
+
+        private string NameClaimTypeRetriever(SecurityToken token, string x)
+        {
+            return "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress";
         }
 
         private IGrainFactory CreateGrainFactory(IServiceProvider services)

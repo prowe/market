@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Orleans;
 
 namespace Market
 {
+    [Authorize]
     public class AccountController : Controller
     {
         private readonly IGrainFactory grainFactory;
@@ -19,11 +22,18 @@ namespace Market
             this.logger = logger;
         }
 
+        [HttpGet]
+        [Route("api/account")]
+        public IPrincipal GetAccount()
+        {
+            return this.User;
+        }
+
         [HttpPost]
         [Route("api/orders")]
         public async Task<Order> SubmitOrder([FromBody] Order order)
         {
-            order.AccountId = "abc@example.com";
+            order.AccountId = this.User.Identity.Name;
             logger.LogInformation("Submitting order: {0}", order);
             await AccountGrain.SubmitOrder(order);
             logger.LogInformation("Order submitted: {0}", order);
@@ -45,6 +55,6 @@ namespace Market
         }
 
         private IAccountGrain AccountGrain 
-            => grainFactory.GetGrain<IAccountGrain>("abc@example.com");
+            => grainFactory.GetGrain<IAccountGrain>(this.User.Identity.Name);
     }
 }
