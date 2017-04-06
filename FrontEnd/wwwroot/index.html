@@ -37,6 +37,41 @@
                     </tbody>
                 </table>
             </div>
+
+            <div id="orders" v-if="user">
+                <h2>Orders</h2>
+                <table>
+                    <tbody>
+                        <tr v-for="o in orders">
+                            <td>{{o.symbol}}</td>
+                            <td>{{o.type}}</td>
+                            <td>{{o.price}}</td>
+                            <td><a href="#" v-on:click="cancelOrder(o)">Cancel</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="quotes" v-if="user">
+                <h2>Quotes</h2>
+                <form v-on:submit="getQuote" v-on:submit.prevent >
+                    <label for="symbol">Symbol: </label>
+                    <input id="symbol" v-model="quotes.symbol"/>
+                    <button type="submit">Get</button>
+                </form>
+                <div>
+                    <strong>{{quotes.quote.symbol}}:</strong>
+                    Bid: {{quotes.quote.bid}}
+                    Ask: {{quotes.quote.ask}}
+                    Last: {{quotes.quote.last}}
+                </div>
+                <div>
+                    Trade {{quotes.quote.symbol}} @ 
+                    <input v-model="order.price" >
+                    <button v-on:click="executeBuy">Buy</button>
+                    <button v-on:click="executeSell">Sell</button>
+                </div>
+            </div>
         </main>
 
         <script src="https://unpkg.com/vue"></script>
@@ -61,10 +96,19 @@
                         client_id: '548329189765-5jvrf6dbe5u2knudlgqi46pabk8rcdf0.apps.googleusercontent.com',
                         scope: "openid profile email"
                     },
-                    positions: []
+                    positions: [],
+                    orders: [],
+                    quotes: {
+                        symbol: null,
+                        quote: {}
+                    },
+                    order: {
+                        price: null
+                    }
                 },
                 created: function() {
-                    setInterval(this.refreshPositions, 2000);
+                    setInterval(this.refreshPositions, 5000);
+                    setInterval(this.refreshOrders, 5000);
                 },
                 methods: {
                     onSignInSuccess: function (googleUser) {
@@ -84,6 +128,45 @@
                         console.log("Refreshing positions");
                         this.$http.get('/api/positions').then(function(response) {
                             this.positions = response.body;
+                        });
+                    },
+                    refreshOrders: function () {
+                        if (!this.user) {
+                            return;
+                        }
+                        console.log("Refreshing orders");
+                        this.$http.get('/api/orders').then(function(response) {
+                            this.orders = response.body;
+                        });
+                    },
+                    getQuote: function() {
+                        console.log("Getting quote for " + this.quotes.symbol);
+                        this.$http.get(`/api/securities/${this.quotes.symbol}/quote`).then(function(response) {
+                            this.quotes.quote = response.body;
+                            this.order.symbol = this.quotes.quote.symbol;
+                        });
+                    },
+                    executeBuy: function() {
+                        this.order.type = "Buy";
+                        this.executeOrder();
+                    },
+                    executeSell: function() {
+                        this.order.type = "Sell";
+                        this.executeOrder();
+                    },
+                    executeOrder: function() {
+                        console.log("submitting order: ", this.order);
+                        this.$http.post('/api/orders', this.order).then(function(response) {
+                            this.order = {};
+                            this.orders.push(response.body);
+                        });
+                    },
+                    cancelOrder: function(order) {
+                        this.$http.delete(`/api/orders/${order.id}`).then(function(response) {
+                            var index = this.orders.indexOf(order);
+                            if(index >= 0) {
+                                this.orders.splice(index, 1);
+                            }
                         });
                     }
                 }

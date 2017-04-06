@@ -47,6 +47,13 @@ namespace Market
             return await AccountGrain.GetOpenOrders();
         }
 
+        [Route("api/orders/{orderId}")]
+        [HttpDelete]
+        public async Task DeleteOrder(Guid orderId)
+        {
+            await AccountGrain.CancelOrder(orderId);
+        }
+
         [Route("api/positions")]
         [HttpGet]
         public async Task<IEnumerable<Position>> GetPostitions()

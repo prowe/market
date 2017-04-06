@@ -16,14 +16,15 @@ namespace Market
         public Task<IEnumerable<Position>> GetPositions()
             => Task.FromResult(this.State.PositionsBySymbol.Values.AsEnumerable());
 
-        public Task SubmitOrder(Order order)
+        public async Task SubmitOrder(Order order)
         {
             this.State.OpenOrders.Add(order);
             var securityGrain = GrainFactory.GetGrain<ISecurityGrain>(order.Symbol);
-            return securityGrain.SubmitOrder(order);
+            await securityGrain.SubmitOrder(order);
+            await this.WriteStateAsync(); 
         }
 
-        public Task OrderFilled(Order order)
+        public async Task OrderFilled(Order order)
         {
             this.State.OpenOrders.Remove(order);
 
@@ -38,7 +39,19 @@ namespace Market
             var quantity = order.Type == OrderType.Buy ? 1 : -1;
             positions[symbol].TotalCostBasis += (order.Price * quantity);
             positions[symbol].Quantity += quantity;
-            return Task.CompletedTask;
+            await this.WriteStateAsync(); 
+        }
+
+        public async Task CancelOrder(Guid orderId)
+        {
+            var openOrders = this.State.OpenOrders;
+            var order = openOrders.FirstOrDefault(o => o.Id == orderId);
+            if (order != null) {
+                openOrders.Remove(order);
+                var securityGrain = GrainFactory.GetGrain<ISecurityGrain>(order.Symbol);
+                await securityGrain.CancelOrder(order);
+                await this.WriteStateAsync(); 
+            }
         }
     }
 

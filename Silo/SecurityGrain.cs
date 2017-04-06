@@ -26,6 +26,13 @@ namespace Market
             await this.WriteStateAsync();
         }
 
+        public async Task CancelOrder(Order order)
+        {
+            State.Bids.Remove(order);
+            State.Offers.Remove(order);
+            await this.WriteStateAsync(); 
+        }
+
         private void PushOrderToLevel2(Order order)
         {
             var stack = order.Type == OrderType.Buy
